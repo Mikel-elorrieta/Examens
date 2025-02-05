@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SQLAriketa</string>
+    <string name="Izena_hint">Introduce tu Nombre</string>
+    <string name="Desk_hint">Introduce la Descripción</string>
+    <string name="Title">Lenguajes de Programación</string>
+    <string name="bistaratu">Mostrar Datos</string>
+    <string name="Gehitu">Agregar</string>
+    <string name="Ezabatu">Eliminar</string>
+    <string name="Aldatu">Modificar</string>
+    <string name="Iragazi">Filtrar</string>
+    <string name="Garbitu">Limpiar</string>
+    <string name="idSartu">Introduce ID</string>
+    <string name="izenaSartu">Introduce Nombre</string>
+
+    <string-array name="languages_array">
+        <item>Selecciona</item>
+        <item>Euskera</item>
+        <item>Español</item>
+        <item>Inglés</item>
+    </string-array>
+    <string-array name="toolbar_options">
+        <item>Selecciona</item>
+        <item>Agregar</item>
+        <item>Salir</item>
+    </string-array>
+    <string name="softwareLibrea">Software Libre</string>
+    <string name="gorde">Guardar</string>
+    <string name="editatu">Editar</string>
+    <string name="ezabatu">Eliminar</string>
+    <string name="dialogmsg">¿Estás seguro de que quieres guardar los datos?</string>
+    <string name="bai">Sí</string>
+    <string name="ez">No</string>
+    <string name="gordeEginDa">Los datos han sido guardados</string>
+</resources>
