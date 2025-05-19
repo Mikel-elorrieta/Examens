@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -13,157 +14,100 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Random;
 
 public class QrSkanner extends AppCompatActivity {
-    private ImageView imgAurreikuspena;
-    private Uri argazkiUri;
-    private String egungoArgazkiBidea;
+    private static final int CAMERA_REQUEST_CODE = 100;
+    private static final int CAMERA_PERMISSION_CODE = 101;
 
-    private Button btnArgazkiaAtera;
-    private ActivityResultLauncher<Intent> cameraLauncher;
+    private ImageView imageView;
+    private Button btnTakePicture;
+    private Uri imageUri;
+    private DBHelper dbHelper;
+    private int idUsuario = 1; // Este ID debería venir del usuario logueado
+    private int idLocal = 1; // Este ID debería obtenerse del QR escaneado
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_qr_skanner);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            Button btnArgazkiaAtera = findViewById(R.id.btnAQR);
 
+        imageView = findViewById(R.id.qrScannerPreview);
+        btnTakePicture = findViewById(R.id.btnAQR);
+        dbHelper = new DBHelper(this);
 
-
-            btnArgazkiaAtera.setOnClickListener(v1 -> {
-                kameraZabaldu();
-            });
-            return insets;
-
-
-
-
-
-        });
-
-        // Configurar resultado de la cámara
-        cameraLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK) {
-                        if (imgAurreikuspena != null && argazkiUri != null) {
-                            imgAurreikuspena.setImageURI(argazkiUri);
-                        }
-                        Toast.makeText(this, "¡ONDO!", Toast.LENGTH_SHORT).show();
-
-                        // Generar ID random para la cola/ticket (ejemplo 1-1000)
-                        int idRandom = new Random().nextInt(16) + 1;
-
-                        // Pasar ID y URI a la siguiente pantalla Menu
-                        Intent intent = new Intent(QrSkanner.this, Menu.class);
-                        intent.putExtra("ID_RANDOM", idRandom);
-                        intent.putExtra("URI_FOTO", argazkiUri.toString());
-                        startActivity(intent);
-
-
-                    } else {
-                        Toast.makeText(this, "ERROR", Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-
-
-
-        // Comprobar permisos
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    android.Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, 100);
-        }
-
-    }
-
-    public long crearCola(int idLocal, int turnoAleatorio, int idUsuario) {
-        DBHelper dbHelper = new DBHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put("local_id", idLocal);              // ID del local
-        values.put("usuario_id", idUsuario);          // ID del usuario
-        values.put("turno", turnoAleatorio);          // Turno generado aleatoriamente
-        values.put("tiempo_restante", 10);            // Por defecto: 10 minutos
-        values.put("estado", "esperando");            // Estado inicial
-
-        long resultado = db.insert("colas", null, values);
-        db.close();
-        return resultado; // Devuelve -1 si falla
-    }
-
-
-    private void kameraZabaldu() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        if (isCameraAvailable()) {
-            File argazkiFitxategia = null;
-            try {
-                argazkiFitxategia = sortuIrudiFitxategia();
-            } catch (IOException e) {
-                Log.e("Kamera", "Error al crear el archivo de imagen", e);
-                Toast.makeText(this, "Error al preparar el archivo para guardar la foto", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (argazkiFitxategia != null) {
-                argazkiUri = FileProvider.getUriForFile(this, "com.example.mugikorrekokamera.fileprovider", argazkiFitxategia);
-                Log.d("Kamera", "URI de la imagen: " + argazkiUri.toString());
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, argazkiUri);
-                cameraLauncher.launch(intent);
+        btnTakePicture.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
             } else {
-                Toast.makeText(this, "No se pudo crear el archivo para la imagen", Toast.LENGTH_SHORT).show();
+                openCamera();
             }
-        } else {
-            Toast.makeText(this, "No se encontró una aplicación de cámara", Toast.LENGTH_SHORT).show();
-        }
+        });
     }
 
-    private boolean isCameraAvailable() {
-        PackageManager packageManager = getPackageManager();
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
-    }
+    private void openCamera() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "Nueva Imagen");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "Desde la cámara");
+        imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-    private File sortuIrudiFitxategia() throws IOException {
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String fitxategiIzena = "JPEG_" + timestamp + "_";
-        File direktorioa = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(fitxategiIzena, ".jpg", direktorioa);
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 100) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Kamera baimena eman da!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Kamera baimena beharrezkoa da!", Toast.LENGTH_SHORT).show();
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                imageView.setImageBitmap(bitmap);
+
+                // Simulación lectura QR
+                idLocal = new Random().nextInt(16) + 1; // ID local entre 1 y 16
+                int tiempoRestante = new Random().nextInt(1) + 1; // minutos
+
+// Nota: mejor no asignar turno aleatorio, debería ser autoincremental en DB, así que eliminamos esto
+                 int turno = new Random().nextInt(300);
+
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                values.put("turno", turno);
+                values.put("usuario_id", idUsuario);
+                values.put("local_id", idLocal);
+                values.put("tiempo_restante", tiempoRestante);
+                values.put("estado", "esperando");
+
+// Insertar y recuperar el ID autogenerado (clave primaria)
+                long idCola = db.insert("colas", null, values);
+
+                if (idCola != -1) {
+                    // Aquí idCola es el ID real del registro insertado
+                    Toast.makeText(this, "Te has unido a la cola. ID de cola: " + idCola + ", tiempo de espera: " + tiempoRestante + " minutos", Toast.LENGTH_LONG).show();
+
+                    // Ahora puedes lanzar la siguiente actividad pasando este idCola
+                    Intent intent = new Intent(this, Menu.class);
+                    intent.putExtra("ID_COLA", (int)idCola);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(this, "Error al unirse a la cola", Toast.LENGTH_SHORT).show();
+                }
+
+
+                db.close();
+
+            } catch (IOException e) {
+                Log.e("QRActivity", "Error al cargar imagen", e);
             }
         }
     }

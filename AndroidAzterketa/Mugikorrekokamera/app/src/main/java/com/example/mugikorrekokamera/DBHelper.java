@@ -123,10 +123,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "('Fan Zone Athletic - Bilbao', 'Explanada San Mamés, Bilbao', 'Pantalla gigante y actividades para la final en Bilbao.', 'Finaleko ekitaldiak eta pantaila erraldoia Bilbon', 43.2640, -2.9495)"
         );
     }
-    public Cursor getLocalById(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM locales WHERE id = ?", new String[]{String.valueOf(id)});
-    }
+
     public boolean login(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -142,10 +139,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return exists;
     }
-    public Cursor getColaPorTurno(int turno) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM colas WHERE turno = ?", new String[]{String.valueOf(turno)});
-    }
+
 
 
     public boolean registerUser(String nombre, String apellidos, String correo, String usuario, String contrasena, String dni) {
@@ -184,6 +178,16 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
+    public Cursor getColaById(int idCola) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_COLAS + " WHERE " + COLUMN_COLA_ID + " = ?";
+        return db.rawQuery(query, new String[]{String.valueOf(idCola)});
+    }
+    public Cursor getLocalById(int idLocal) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_LOCALES + " WHERE " + COLUMN_LOCAL_ID + " = ?";
+        return db.rawQuery(query, new String[]{String.valueOf(idLocal)});
+    }
 
 
 }
