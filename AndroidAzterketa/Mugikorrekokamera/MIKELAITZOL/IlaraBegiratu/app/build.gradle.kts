@@ -33,7 +33,6 @@ android {
 
 dependencies {
         implementation ("androidx.core:core:1.10.1")
-        implementation ("org.osmdroid:osmdroid-android:6.1.15")
 
 
 

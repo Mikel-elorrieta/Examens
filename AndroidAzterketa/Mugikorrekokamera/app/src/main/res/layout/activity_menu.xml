@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/tvBooking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Booking: 45"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvKioskoa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kioskoa: 43"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvCuentaAtras"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Espera: 05:00"
+        android:textSize="16sp"
+        android:textStyle="italic"
+        android:layout_marginBottom="12dp"/>
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/mapa"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"/>
+
+    <Button
+        android:id="@+id/btnActualizar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aktualizatu"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnScanQR"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="QR eskaneatu"
+        android:layout_marginTop="10dp"/>
+</LinearLayout>
