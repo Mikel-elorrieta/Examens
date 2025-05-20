@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Mugikorreko kamera</string>
-    <string name="ilarabegiratu">IlaraBegiratu</string>
-    <string name="qr_kodea_eskaneatu_zure_ilara_ikusteko">QR kodea eskaneatu zure ilara ikusteko</string>
-    <string name="qr_scanner">QR Scanner</string>
-    <string name="argazki_qr_kodea">Argazki QR kodea</string>
-</resources>
