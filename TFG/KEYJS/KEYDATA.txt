@@ -1,0 +1,4 @@
+storeFile=CUsersmikelDocumentstfg_key.jks
+storePassword=ilarabegiratu
+keyAlias=tfg_key
+keyPassword=ilarabegiratu
