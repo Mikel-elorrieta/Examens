@@ -28,15 +28,13 @@ public class Login extends AppCompatActivity {
         dbHelper = new DBHelper(this);
 
         btnLogin.setOnClickListener(v -> {
-            Log.d("LoginActivity", "Login button clicked");
             boolean valido = validarUsuario(etUser.getText().toString(), etPass.getText().toString());
-            Log.d("LoginActivity", "Usuario válido: " + valido);
             if (valido) {
-                Log.d("LoginActivity", "Navegando a MainActivity");
                 startActivity(new Intent(this, Menu.class));
+
                 finish();
             } else {
-                Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Erabiltzaile edo pasahitza txarto daude.", Toast.LENGTH_SHORT).show();
             }
         });
 

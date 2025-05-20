@@ -34,6 +34,9 @@ android {
 dependencies {
         implementation ("androidx.core:core:1.10.1")
         implementation ("org.osmdroid:osmdroid-android:6.1.15")
+    // ZXing (más moderna y compatible con AndroidX)
+    implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("com.google.zxing:core:3.5.2")
 
 
 

@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "ZerrendaDB.db";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
 
     // Tabla USUARIOS
     public static final String TABLE_USUARIOS = "usuarios";
@@ -29,6 +29,22 @@ public class DBHelper extends SQLiteOpenHelper {
                     COLUMN_USERNAME + " TEXT NOT NULL, " +
                     COLUMN_CONTRASENA + " TEXT NOT NULL, " +
                     COLUMN_DNI + " TEXT NOT NULL);";
+    // Tabla USUARIOS
+    // Tabla USUARIO LOGEADO
+    public static final String TABLE_USUARIO_LOGEADO = "usuario_logeado";
+    public static final String COLUMN_USUARIO_LOGEADO_ID = "id";
+    public static final String COLUMN_USUARIO_LOGEADO_NOMBRE = "nombre";
+    public static final String COLUMN_USUARIO_LOGEADO_USERNAME = "usuario";
+
+    private static final String CREATE_TABLE_USUARIO_LOGEADO =
+            "CREATE TABLE " + TABLE_USUARIO_LOGEADO + " (" +
+                    COLUMN_USUARIO_LOGEADO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_USUARIO_LOGEADO_USERNAME + " TEXT NOT NULL, " +
+                    COLUMN_USUARIO_LOGEADO_NOMBRE + " TEXT NOT NULL" +
+                    ");";
+
+    // Tabla USUARIO LOGEADO
+
 
     // Tabla LOCALES
     public static final String TABLE_LOCALES = "locales";
@@ -79,6 +95,7 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USUARIOS);
+        db.execSQL(CREATE_TABLE_USUARIO_LOGEADO);
         db.execSQL(CREATE_TABLE_LOCALES);
         db.execSQL(CREATE_TABLE_COLAS); //
         insertarDatosIniciales(db);
@@ -90,6 +107,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_COLAS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USUARIOS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCALES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USUARIO_LOGEADO);
         onCreate(db);
     }
 
@@ -97,9 +115,9 @@ public class DBHelper extends SQLiteOpenHelper {
         // Usuarios
         db.execSQL("INSERT INTO " + TABLE_USUARIOS + " (nombre, apellidos, correo, usuario, contrasena, dni) VALUES " +
                 "('Administrador', 'Del Sistema', 'admin@example.com', 'a', 'a', '00000000A')," +
-                "('Aitzol', 'Etxeberria', 'aitzol@example.com', 'aitzol', 'pass123', '11111111B')," +
-                "('Mikel', 'Elorrieta', 'mikel@example.com', 'mikel', 'pass123', '22222222C')," +
-                "('Oier', 'Larralde', 'oier@example.com', 'oier', 'pass123', '33333333D')");
+                "('Aitzol', 'Sagardui', 'aitzol@example.com', 'aitzol', 'pass123', '11111111B')," +
+                "('Mikel', 'Martin', 'mikel@example.com', 'mikel', 'pass123', '22222222C')," +
+                "('Oier', 'Palacios', 'oier@example.com', 'oier', 'pass123', '33333333D')");
 
 
         db.execSQL("INSERT INTO " + TABLE_LOCALES + " (nombre, ubicacion, descripcion_es, descripcion_eu, latitud, longitud) VALUES " +
@@ -125,21 +143,73 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public boolean login(String username, String password) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = "SELECT * FROM " + TABLE_USUARIOS +
+        String query = "SELECT " + COLUMN_USUARIO_ID + ", " + COLUMN_NOMBRE +
+                " FROM " + TABLE_USUARIOS +
                 " WHERE " + COLUMN_USERNAME + " = ? AND " + COLUMN_CONTRASENA + " = ?";
         String[] selectionArgs = { username, password };
 
         Cursor cursor = db.rawQuery(query, selectionArgs);
 
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
+        if (cursor.moveToFirst()) {
+            int idUsuarioIndex = cursor.getColumnIndex(COLUMN_USUARIO_ID);
+            int nombreIndex = cursor.getColumnIndex(COLUMN_NOMBRE);
 
-        return exists;
+            if (idUsuarioIndex == -1 || nombreIndex == -1) {
+                cursor.close();
+                db.close();
+                return false;
+            }
+
+            int idUsuario = cursor.getInt(idUsuarioIndex);
+            String nombre = cursor.getString(nombreIndex);
+
+            // Limpiar tabla de usuario logeado
+            db.delete(TABLE_USUARIO_LOGEADO, null, null);
+
+            // Insertar usuario logeado
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_USUARIO_LOGEADO_USERNAME, username);
+            values.put(COLUMN_USUARIO_LOGEADO_NOMBRE, nombre);
+            long result = db.insert(TABLE_USUARIO_LOGEADO, null, values);
+
+            cursor.close();
+            db.close();
+
+            return result != -1;
+        } else {
+            cursor.close();
+            db.close();
+            return false;
+        }
     }
 
+    public int getLoggedInUser() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_USUARIO_LOGEADO;
+        Cursor cursor = db.rawQuery(query, null);
+
+        boolean isLoggedIn = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        if (isLoggedIn) {
+            // Si hay un usuario logeado, devuelvo su id
+            db = this.getReadableDatabase();
+            String query2 = "SELECT " + COLUMN_USUARIO_LOGEADO_ID + " FROM " + TABLE_USUARIO_LOGEADO;
+            Cursor cursor2 = db.rawQuery(query2, null);
+            if (cursor2.moveToFirst()) {
+                int idUsuarioIndex = cursor2.getColumnIndex(COLUMN_USUARIO_LOGEADO_ID);
+                int idUsuario = cursor2.getInt(idUsuarioIndex);
+                cursor2.close();
+                db.close();
+                return idUsuario;
+            }
+        }
+        // Si no hay un usuario logeado, devuelvo -1
+        db.close();
+        return -1;
+    }
 
 
     public boolean registerUser(String nombre, String apellidos, String correo, String usuario, String contrasena, String dni) {
@@ -188,6 +258,18 @@ public class DBHelper extends SQLiteOpenHelper {
         String query = "SELECT * FROM " + TABLE_LOCALES + " WHERE " + COLUMN_LOCAL_ID + " = ?";
         return db.rawQuery(query, new String[]{String.valueOf(idLocal)});
     }
+    public void eliminarCola(int idCola) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_COLAS, COLUMN_COLA_ID + " = ?", new String[]{String.valueOf(idCola)});
+        db.close();
+    }
+    public void marcarColaComoAtendida(int idCola) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("estado", "atendido");
+        db.update("colas", values, "id = ?", new String[]{String.valueOf(idCola)});
+    }
+
 
 
 }

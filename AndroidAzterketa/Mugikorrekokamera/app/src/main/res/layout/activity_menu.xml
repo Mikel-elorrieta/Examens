@@ -11,7 +11,7 @@
         android:id="@+id/tvBooking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Booking: 45"
+        android:text="Booking:"
         android:textSize="18sp"
         android:textStyle="bold"/>
 
@@ -19,18 +19,27 @@
         android:id="@+id/tvKioskoa"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Kioskoa: 43"
+        android:text="Descripcion:"
         android:textSize="16sp"
         android:layout_marginBottom="8dp"/>
 
     <TextView
-        android:id="@+id/tvCuentaAtras"
+        android:id="@+id/tvEsperaEstimado"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Espera: 05:00"
+        android:layout_marginBottom="12dp"
+        android:text="Espera estimado"
         android:textSize="16sp"
-        android:textStyle="italic"
-        android:layout_marginBottom="12dp"/>
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/tvTurno"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="Turno: "
+        android:textSize="16sp"
+        android:textStyle="italic" />
 
     <org.osmdroid.views.MapView
         android:id="@+id/mapa"
@@ -38,16 +47,16 @@
         android:layout_height="300dp"/>
 
     <Button
-        android:id="@+id/btnActualizar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Aktualizatu"
-        android:layout_marginTop="20dp"/>
-
-    <Button
         android:id="@+id/btnScanQR"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="QR eskaneatu"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:text="QR eskaneatu" />
+
+    <Button
+        android:id="@+id/btnDejarCola"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Ilara utxi" />
 </LinearLayout>

@@ -30,7 +30,7 @@
         android:layout_marginBottom="16dp"
         android:backgroundTint="#00AA00"
         android:padding="16dp"
-        android:text="@string/argazki_qr_kodea"
+        android:text="QR kodea irakurri"
         android:textColor="#FFFFFF"></Button>
 
 </LinearLayout>

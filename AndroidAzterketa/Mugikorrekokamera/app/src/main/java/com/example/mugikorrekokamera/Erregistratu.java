@@ -38,17 +38,17 @@ public class Erregistratu extends AppCompatActivity {
             String dni = etDni.getText().toString().trim();
 
             if (nombre.isEmpty() || apellidos.isEmpty() || correo.isEmpty() || usuario.isEmpty() || contrasena.isEmpty() || dni.isEmpty()) {
-                Toast.makeText(this, "Por favor, rellena todos los campos", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Mesedez, bete eremu guztiak", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             boolean success = dbHelper.registerUser(nombre, apellidos, correo, usuario, contrasena, dni);
 
             if (success) {
-                Toast.makeText(this, "Registro exitoso, ya puedes iniciar sesión", Toast.LENGTH_LONG).show();
-                finish(); // vuelve al login
+                Toast.makeText(this, "Erregistro arrakastatsua, saioa has dezakezu", Toast.LENGTH_LONG).show();
+                finish(); // Itzuli Login-era
             } else {
-                Toast.makeText(this, "El usuario ya existe, prueba con otro", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Erabiltzailea existitzen da, beste batekin probatu\n", Toast.LENGTH_SHORT).show();
             }
         });
     }
